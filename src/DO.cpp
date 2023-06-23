@@ -7,7 +7,7 @@
 #define CAL2_V (1300)
 #define CAL2_T (15)
 
-DO::DO(uint8_t pin, uint32_t vref, uint32_t aref, int cal_mode)
+DO::DO(uint8_t pin, double vref, double aref, int cal_mode)
 {
     _pin = pin;
     _vref = vref;
