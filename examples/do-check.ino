@@ -16,5 +16,5 @@ void setup()
 void loop()
 {
     sensor.setTemperature(25);
-    sensor.outputDOData(1000);
+    sensor.getAllDOData(1000);
 }
