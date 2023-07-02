@@ -19,12 +19,12 @@ int analogBuffer[SCOUNT];
 int analogBufferTemp[SCOUNT];
 int analogBufferIndex = 0,copyIndex = 0;
 
-#define SaturationDoVoltageAddress 12
-#define SaturationDoTemperatureAddress 16
-float SaturationDoVoltage,SaturationDoTemperature;
-float averageVoltage;
+#define SatDOVoltAddr 12
+#define SatDOTempAddr 16
+float SatDOVolt,SatDOTemp;
+float avgVolt;
 
-const float SaturationValueTab[41] PROGMEM = {
+const float DO_Table[41] PROGMEM = {
 14.46, 14.22, 13.82, 13.44, 13.09,
 12.74, 12.42, 12.11, 11.81, 11.53,
 11.26, 11.01, 10.77, 10.53, 10.30,
@@ -87,7 +87,7 @@ void DO::calibrationDO(byte mode)
 {
     char *receivedBufferPtr;
     static boolean doCalibrationFinishFlag = 0,enterCalibrationFlag = 0;
-    float voltageValueStore;
+    //float voltageValueStore;
     switch(mode)
     {
       case 0:
@@ -110,10 +110,10 @@ void DO::calibrationDO(byte mode)
          Serial.println();
          Serial.println(F(">>>Saturation Calibration Finish!<<<"));
          Serial.println();
-         EEPROM_write(SaturationDoVoltageAddress, averageVoltage);
-         EEPROM_write(SaturationDoTemperatureAddress, temperature);
-         SaturationDoVoltage = averageVoltage;
-         SaturationDoTemperature = temperature;
+         EEPROM_write(SatDOVoltAddr, avgVolt);
+         EEPROM_write(SatDOTempAddr, temperature);
+         SatDOVolt = avgVolt;
+         SatDOTemp = temperature;
          doCalibrationFinishFlag = 1;
       }
       break;
@@ -164,17 +164,17 @@ int DO::getMedianDO(int bArray[], int iFilterLen)
 
 void DO::readDoCharacteristicValues(void)
 {
-    EEPROM_read(SaturationDoVoltageAddress, SaturationDoVoltage);
-    EEPROM_read(SaturationDoTemperatureAddress, SaturationDoTemperature);
-    if(EEPROM.read(SaturationDoVoltageAddress)==0xFF && EEPROM.read(SaturationDoVoltageAddress+1)==0xFF && EEPROM.read(SaturationDoVoltageAddress+2)==0xFF && EEPROM.read(SaturationDoVoltageAddress+3)==0xFF)
+    EEPROM_read(SatDOVoltAddr, SatDOVolt);
+    EEPROM_read(SatDOTempAddr, SatDOTemp);
+    if(EEPROM.read(SatDOVoltAddr)==0xFF && EEPROM.read(SatDOVoltAddr+1)==0xFF && EEPROM.read(SatDOVoltAddr+2)==0xFF && EEPROM.read(SatDOVoltAddr+3)==0xFF)
     {
-      SaturationDoVoltage = 1127.6;   //default voltage:1127.6mv
-      EEPROM_write(SaturationDoVoltageAddress, SaturationDoVoltage);
+      SatDOVolt = 1127.6;   //default voltage:1127.6mv
+      EEPROM_write(SatDOVoltAddr, SatDOVolt);
     }
-    if(EEPROM.read(SaturationDoTemperatureAddress)==0xFF && EEPROM.read(SaturationDoTemperatureAddress+1)==0xFF && EEPROM.read(SaturationDoTemperatureAddress+2)==0xFF && EEPROM.read(SaturationDoTemperatureAddress+3)==0xFF)
+    if(EEPROM.read(SatDOTempAddr)==0xFF && EEPROM.read(SatDOTempAddr+1)==0xFF && EEPROM.read(SatDOTempAddr+2)==0xFF && EEPROM.read(SatDOTempAddr+3)==0xFF)
     {
-      SaturationDoTemperature = 25.0;   //default temperature is 25^C
-      EEPROM_write(SaturationDoTemperatureAddress, SaturationDoTemperature);
+      SatDOTemp = 25.0;   //default temperature is 25^C
+      EEPROM_write(SatDOTempAddr, SatDOTemp);
     }
 }
 
@@ -211,11 +211,11 @@ void DO::run(){
       {
         analogBufferTemp[copyIndex]= analogBuffer[copyIndex];
       }
-      averageVoltage = getMedianDO(analogBufferTemp,SCOUNT) * (float)_vref / _aref; // read the value more stable by the median filtering algorithm
+      avgVolt = getMedianDO(analogBufferTemp,SCOUNT) * (float)_vref / _aref; // read the value more stable by the median filtering algorithm
       Serial.print(F("Temperature:"));
       Serial.print(temperature,1);
       Serial.print(F("^C"));
-      doValue = pgm_read_float_near( &SaturationValueTab[0] + (int)(SaturationDoTemperature+0.5) ) * averageVoltage / SaturationDoVoltage;  //calculate the do value, doValue = Voltage / SaturationDoVoltage * SaturationDoValue(with temperature compensation)
+      doValue = pgm_read_float_near( &DO_Table[0] + (int)(SatDOTemp+0.5) ) * avgVolt / SatDOVolt;  //calculate the do value, doValue = Voltage / SatDOVolt * SaturationDoValue(with temperature compensation)
       Serial.print(F(",  DO Value:"));
       Serial.print(doValue,2);
       Serial.println(F("mg/L"));
