@@ -4,7 +4,7 @@
 #include "DO.h"
 
 float doValue;
-float temperature = 25;
+float temperature;
 
 #define EEPROM_write(address, p)        \
   {                                     \
@@ -196,6 +196,14 @@ float DO::getTemperature()
     return _temp;
 }
 
+int DO::analogDO(){
+  return analogRead(_pin);
+}
+
+float DO::voltageDO(){
+  return analogDO() * _vref / _aref;
+}
+
 float DO::samplingVoltDO(){
   static unsigned long analogSampleTimepoint = millis();
   if (millis() - analogSampleTimepoint > 30U) // every 30 milliseconds,read the analog value from the ADC
@@ -231,7 +239,7 @@ float DO::samplingTempDO(){
 }
 
 float DO::getDO(){
-  doValue = pgm_read_float_near(&DO_Table[0] + (int)(SatDOTemp + 0.5)) * avgVolt / SatDOVolt;
+  doValue = pgm_read_float_near(&DO_Table[0] + (int)(SatDOTemp + 0.5)) * samplingVoltDO() / SatDOVolt;
   return doValue;
 }
 
@@ -242,6 +250,15 @@ void DO::modeDO(){
     calibrationDO(modeIndex);
   }
   EEPROM.commit();
+}
+
+void DO::getAllDOData(){
+  Serial.print("Temp: " + String(getTemperature()) + "°C | ");
+  Serial.print("DO Val: " + String(getDO()) + " mg/L | ");
+  Serial.print("Sat Volt: " + String(SatDOVolt) + " mV | ");
+  Serial.print("Avg Volt: " + String(samplingVoltDO()) + " mV | ");
+  Serial.print("Volt in: " + String(voltageDO()) + " mV | ");
+  Serial.println("Analog in: " + String(analogDO()) + " | ");
 }
 
 void DO::begin()
