@@ -6,7 +6,7 @@
 #define AREF 4095
 #define CAL_MODE 1
 
-DO sensor(SENSOR_PIN, VREF, AREF, CAL_MODE);
+DO sensor(SENSOR_PIN, VREF, AREF);
 
 void setup()
 {
