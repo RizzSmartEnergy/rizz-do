@@ -14,10 +14,13 @@ public:
     void characteristicDO(void);
     void setTemperature(float temp);
     float getTemperature();
+    int analogDO();
+    float voltageDO();
     float samplingVoltDO();
     float samplingTempDO();
     float getDO();
     void modeDO();
+    void getAllDOData();
     void begin();
     void run();
 
