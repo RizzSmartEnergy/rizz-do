@@ -11,14 +11,20 @@ public:
     byte uartParsingDO();
     void calibrationDO(byte mode);
     int getMedianDO(int bArray[], int iFilterLen);
-    void readDoCharacteristicValues(void);
+    void characteristicDO(void);
+    void setTemperature(float temp);
+    float getTemperature();
+    float samplingVoltDO();
+    float samplingTempDO();
+    float getDO();
+    void modeDO();
     void begin();
     void run();
 
 private:
     uint8_t _pin;
     double _vref, _aref;
-    // float _temp;
+    float _temp;
     // int _baudrate, _delay_time;
 };
 
