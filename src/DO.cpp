@@ -230,15 +230,18 @@ float DO::samplingVoltDO(){
 
 float DO::samplingTempDO(){
   static unsigned long tempSampleTimepoint = millis();
-  if (millis() - tempSampleTimepoint > 500U) // every 500 milliseconds, read the temperature
+  if (millis() - tempSampleTimepoint > 500U)
   {
     //tempSampleTimepoint = millis();
-    temperature = getTemperature();  // add your temperature codes here to read the temperature, unit:^C
+    temperature = getTemperature();
   }
   return temperature;
 }
 
 float DO::getDO(){
+  // basic equation
+  // doValue = pgm_read_float_near(&DO_Table[0] + (int)(SatDOTemp + 0.5)) * voltageDO() / SatDOVolt;
+  // more stable
   doValue = pgm_read_float_near(&DO_Table[0] + (int)(SatDOTemp + 0.5)) * samplingVoltDO() / SatDOVolt;
   return doValue;
 }
